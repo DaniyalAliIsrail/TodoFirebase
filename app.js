@@ -7,6 +7,7 @@ import {
   doc,
   deleteDoc,
   updateDoc,
+  
 } from "https://www.gstatic.com/firebasejs/10.3.0/firebase-firestore.js";
 const firebaseConfig = {
   apiKey: "AIzaSyDJigyso8ZbLRduG88rRbxoe-tNO14mjR4",
@@ -35,7 +36,7 @@ const getTodos = () => {
         ${tododata.doc.data().value}
         </div>
         <div class="btnlist"> 
-        <button   onclick="deleteItems('${tododata.doc.id}')">DEL</button>
+        <button   onclick="deleteItems(this,'${tododata.doc.id}')">DEL</button>
         <button onclick="editItems(this , '${tododata.doc.id}')">Edit</button>
        </div>
       </li>`;
@@ -69,9 +70,10 @@ const addList = async () => {
 const btn = document.getElementById("addList1");
 btn.addEventListener("click", addList);
 
-async function deleteItems(id) {
+async function deleteItems(e, id) {
   await deleteDoc(doc(db, "todos", id));
-  console.log("Todo Del");
+  e.remove()
+  
 }
 
 async function editItems(e, id) {
