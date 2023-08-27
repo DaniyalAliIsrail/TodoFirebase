@@ -18,14 +18,17 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const ids = [];
+var list = document.getElementById("list");
 
 //Get data
 const getTodos = () => {
   onSnapshot(collection(db, "todos"), (data) => {
     data.docChanges().forEach((tododata) => {
-      console.log(tododata);
+      // console.log(tododata);
       // console.log(tododata.doc.data().value);
-      var list = document.getElementById("list");
+      ids.push(tododata.doc.id);
+
       if (tododata.type == "removed") {
         var dtodo = document.getElementById(tododata.doc.id);
         dtodo.remove();
@@ -75,38 +78,39 @@ async function deleteItems(id) {
 }
 
 async function editItems(e, id) {
-
-  let val = e.parentNode.parentNode.firstElementChild.textContent;
-  var editValue = prompt("update value", val);
-  e.parentNode.parentNode.firstElementChild.textContent = editValue; 
- //updateDoc method  use
-
-  // await updateDoc(doc(db, "todos", id), {
-  //   let val = e.parentNode.parentNode.firstElementChild.textContent;
-  //   var editValue = prompt("update value", val);
-  //   e.parentNode.parentNode.firstElementChild.textContent = editValue;
-  // });
+  let getValue = e.parentNode.parentNode.firstElementChild.textContent;
+  console.log(getValue);
+  var newValue = prompt("update value", getValue);
+  if(newValue == ""){
+    alert("fill up the input filled")
+    return
+  }
+  e.parentNode.parentNode.firstElementChild.textContent = newValue;
+  try {
+    await updateDoc(doc(db, "todos", id), { value: newValue });
+    console.log("Todo Updated");
+  } catch (error) {
+    console.error("Error updating todo:", error);
+  }
 }
-
-// var val = e.parentNode.parentNode.firstElementChild.textContent;
-// var editValue = prompt("update value", val);
-
-// if (!editValue == " ") {
-//   e.parentNode.parentNode.firstElementChild.textContent = editValue;
-// } else {
-//   Swal.fire({
-//     icon: "error",
-//     title: "Fill up Input filled",
-//     text: "Add todo",
-//     footer: '<a href="">Why do I have this issue?</a>',
-//   });
-// }
 
 const btn1 = document.getElementById("deleteAll1");
 btn1.addEventListener("click", deleteAll);
-function deleteAll() {
-  var list = document.getElementById("list");
-  list.innerHTML = ""; // Set the innerHTML property to an empty string
+async function deleteAll() {
+  try {
+    var list = document.getElementById("list");
+    list.innerHTML = "";
+   
+    ids.forEach( async (id) => {
+      await deleteDoc(doc(db, "todos", id));
+    });
+
+    // for (let i = 0; i < id.length; i++) {
+    //   await deleteDoc(doc(db, "todos", id[i]));
+    // }
+  } catch (e) {
+    console.log(e);
+  }
 }
 window.deleteItems = deleteItems;
 window.editItems = editItems;
